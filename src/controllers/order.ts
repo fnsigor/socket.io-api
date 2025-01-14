@@ -5,13 +5,12 @@ import { OrderStatus } from "../models/OrderStatus";
 import { Request, Response } from "express";
 import { EnumOrderStatus } from "../types/EnumOrderStatus";
 import { changeOrderStatus } from "../utils/changeOrderStatus";
-import App from "../app";
 
-const {eventEmitter} = App.getInstance()
 
 export const getAllOrders = async (req: Request, res: Response): Promise<any> => {
 
   try {
+    
     const orders = await Order.findAll({
       include: [
         { model: Client },
@@ -54,10 +53,7 @@ export const createOrder = async (req: Request, res: Response): Promise<any> => 
     })
 
     // Agenda a mudança de status após 1 minuto
-    setTimeout(async () => {
-      await changeOrderStatus(newOrder)
-      eventEmitter.emit("update-table", req.userId)
-    }, 30000); // 1 minuto = 60000 ms
+    changeOrderStatus(newOrder)
 
     return res.status(201).json({ data: newOrder });
   } catch (error) {

@@ -38,11 +38,9 @@ class App {
     this.eventEmitter.removeAllListeners('update-table')
 
     this.socketIo.on('connection', (socket) => {
-      console.log('Usuário conectado:', socket.id)
 
       // Handle socket disconnect
       socket.on('disconnect', () => {
-        console.log("\n usuário desconectado \n")
         for (const userId in this.userSockets) {
           if (this.userSockets[userId] === socket.id) {
             delete this.userSockets[userId]
@@ -52,19 +50,19 @@ class App {
       })
 
       // Handle user registration
-      socket.on('register', (userId) => {
-        console.log("\n\n\n usuario salvo em memória \n\n\n", userId)
+      socket.on('register', (userId: string) => {
+        console.log(`user ${userId} salvo em memória`)
         this.userSockets[userId] = socket.id
-        socket.join(userId.toString())
+        socket.join(userId)
       })
     })
 
     // Setup event emitter for table updates
-    this.eventEmitter.on("update-table", (userId: number) => {
-      console.log("\n pediu pra att table do user " + userId + "\n")
-      this.socketIo.to(userId.toString()).emit("update-table", {
+    this.eventEmitter.on("update-table", (userId: string) => {
+      this.socketIo.to(userId).emit("update-table", {
         message: "pedido atualizado"
       })
+      console.log(`pedido do user ${userId} atualizado`)
     })
   }
 }
